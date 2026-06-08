@@ -26,7 +26,16 @@ def delete_scan(scan_id: int, db: Session = Depends(get_db)):
 def get_recent_audits(limit: int = 10, db: Session = Depends(get_db)):
     try:
         audits = db.query(Scan).order_by(Scan.created_at.desc()).limit(limit).all()
-        return audits
+        return [
+            {
+                "id": a.id,
+                "url": a.url,
+                "result": a.result,
+                "risk_score": a.risk_score,
+                "created_at": (a.created_at.isoformat() + "Z") if a.created_at else None,
+            }
+            for a in audits
+        ]
     except Exception as e:
         print(f"AUDIT FETCH ERROR: {e}")
         return []
